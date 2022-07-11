@@ -4,6 +4,8 @@ CREATE TABLE TABLE_NAME_PLACEHOLDER (
 	[CHANNEL_REF_KEY] [varchar](200) NULL,
 	[DOCUMENT_ID] [varchar](100) NULL,
 	[LOCALE] [varchar](20) NULL,
+	[BASE_LOCALE] [varchar](20) NULL,
+	[IS_TRANSLATION] [varchar](20) NULL,
 	[MAJOR_VERSION] [varchar](50) NULL,
 	[MINOR_VERSION] [varchar](50) NULL,
 	[INNERLINK_PATH] [varchar](2000) NULL,

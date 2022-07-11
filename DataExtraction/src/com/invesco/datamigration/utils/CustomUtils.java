@@ -3,7 +3,6 @@ package com.invesco.datamigration.utils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -18,9 +17,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.invesco.datamigration.vo.AttachmentDetails;
+import com.invesco.datamigration.vo.CategoryDetails;
 import com.invesco.datamigration.vo.DocumentDetails;
 import com.invesco.datamigration.vo.InlineImageDetails;
 import com.invesco.datamigration.vo.InlineInnerlinkDetails;
+import com.invesco.datamigration.vo.ViewDetails;
 
 public class CustomUtils {
 
@@ -109,6 +110,10 @@ public class CustomUtils {
 															details = performInlineImagesOperation(details);
 															// perform Inline Innerlinks Opreation as well
 															details = performInlineInnerLinksOperation(details);
+															// perform categories operation as well
+															details = performCategoriesOperation(details, doc);
+															// perform views operations as well
+															details = performViewsOperation(details, doc);
 
 															/*
 															 * IDENTIFY ALL FLAGS
@@ -328,6 +333,10 @@ public class CustomUtils {
 															details = performInlineImagesOperation(details);
 															// perform Inline Innerlinks Opreation as well
 															details = performInlineInnerLinksOperation(details);
+															// perform categories operation as well
+															details = performCategoriesOperation(details, doc);
+															// perform views operations as well
+															details = performViewsOperation(details, doc);
 
 															/*
 															 * IDENTIFY ALL FLAGS
@@ -466,6 +475,164 @@ public class CustomUtils {
 		return details;
 	}
 
+	
+	private static DocumentDetails performCategoriesOperation(DocumentDetails details, Document doc)
+	{
+		try
+		{
+			if(null!=doc)
+			{
+				// CATEGORIES NODES
+				NodeList categoriesNodeList = doc.getElementsByTagName("CATEGORIES");
+				if(null!=categoriesNodeList && categoriesNodeList.getLength()>0)
+				{
+					Node catNode=null;
+					NodeList childNodesList  = null;
+					Node childNode=null;
+					for(int a=0;a<categoriesNodeList.getLength();a++)
+					{
+						catNode =(Node)categoriesNodeList.item(a);
+						childNodesList = catNode.getChildNodes();
+						if(null!=childNodesList && childNodesList.getLength()>0)
+						{
+							for(int b=0;b<childNodesList.getLength();b++)
+							{
+								childNode = (Node)childNodesList.item(b);
+								if(null!=childNode.getNodeName() && childNode.getNodeName().equalsIgnoreCase("CATEGORY"))
+								{
+									NodeList subList = childNode.getChildNodes();
+									if(null!=subList && subList.getLength()>0)
+									{
+										Node subNode=null;
+										CategoryDetails dt = new CategoryDetails();
+										for(int c=0;c<subList.getLength();c++)
+										{
+											subNode = (Node)subList.item(c);
+											if(subNode.getNodeName().equals("NAME"))	
+											{
+												dt.setName(Utilities.readNodeValue(subNode));
+											}
+											else if(subNode.getNodeName().equals("REFERENCE_KEY"))	
+											{
+												dt.setRefKey(Utilities.readNodeValue(subNode));
+											}
+											else if(subNode.getNodeName().equals("GUID"))	
+											{
+												dt.setGuid(Utilities.readNodeValue(subNode));
+											}
+											else if(subNode.getNodeName().equals("OBJECTID"))	
+											{
+												dt.setObjectId(Utilities.readNodeValue(subNode));
+											}
+											subNode = null;
+										}
+										
+										if(null!=dt && null!=dt.getRefKey() && !"".equals(dt.getRefKey()))
+										{
+											if(null==details.getCategoryList() || details.getCategoryList().size()<=0)
+											{
+												details.setCategoryList(new ArrayList<CategoryDetails>());
+											}
+											details.getCategoryList().add(dt);
+										}
+										dt  = null;
+									}
+									subList = null;
+								}
+								childNode = null;
+							}
+						}
+						childNodesList=  null;
+						catNode = null;
+					}
+				}				
+			}
+		}
+		catch(Exception e)
+		{
+			Utilities.printStackTraceToLogs(CustomUtils.class.getName(), "performCategoriesOperation()", e);
+		}
+		return details;
+	}
+	
+	private static DocumentDetails performViewsOperation(DocumentDetails details, Document doc)
+	{
+		try
+		{
+			if(null!=doc)
+			{
+				// VIEWS NODES
+				NodeList viewsNodeList = doc.getElementsByTagName("VIEWS");
+				if(null!=viewsNodeList && viewsNodeList.getLength()>0)
+				{
+					Node viewNode=null;
+					NodeList childNodesList  = null;
+					Node childNode=null;
+					for(int a=0;a<viewsNodeList.getLength();a++)
+					{
+						viewNode =(Node)viewsNodeList.item(a);
+						childNodesList = viewNode.getChildNodes();
+						if(null!=childNodesList && childNodesList.getLength()>0)
+						{
+							for(int b=0;b<childNodesList.getLength();b++)
+							{
+								childNode = (Node)childNodesList.item(b);
+								if(null!=childNode.getNodeName() && childNode.getNodeName().equalsIgnoreCase("VIEW"))
+								{
+									NodeList subList = childNode.getChildNodes();
+									if(null!=subList && subList.getLength()>0)
+									{
+										Node subNode=null;
+										ViewDetails dt = new ViewDetails();
+										for(int c=0;c<subList.getLength();c++)
+										{
+											subNode = (Node)subList.item(c);
+											if(subNode.getNodeName().equals("NAME"))	
+											{
+												dt.setName(Utilities.readNodeValue(subNode));
+											}
+											else if(subNode.getNodeName().equals("REFERENCE_KEY"))	
+											{
+												dt.setRefKey(Utilities.readNodeValue(subNode));
+											}
+											else if(subNode.getNodeName().equals("GUID"))	
+											{
+												dt.setGuid(Utilities.readNodeValue(subNode));
+											}
+											else if(subNode.getNodeName().equals("OBJECTID"))	
+											{
+												dt.setObjectId(Utilities.readNodeValue(subNode));
+											}
+											subNode = null;
+										}
+										
+										if(null!=dt && null!=dt.getRefKey() && !"".equals(dt.getRefKey()))
+										{
+											if(null==details.getViewList() || details.getViewList().size()<=0)
+											{
+												details.setViewList(new ArrayList<ViewDetails>());
+											}
+											details.getViewList().add(dt);
+										}
+										dt  = null;
+									}
+									subList = null;
+								}
+								childNode = null;
+							}
+						}
+						childNodesList=  null;
+						viewNode = null;
+					}
+				}				
+			}
+		}
+		catch(Exception e)
+		{
+			Utilities.printStackTraceToLogs(CustomUtils.class.getName(), "performViewsOperation()", e);
+		}
+		return details;
+	}
 	
 	private static DocumentDetails performAttachmentsOperation(DocumentDetails details, Document doc, String parentFolderPath)
 	{
@@ -791,7 +958,7 @@ public class CustomUtils {
 										// add this Image
 										imageDetails = new InlineImageDetails();
 										imageDetails.setImageSourcePath(srcValue);
-										imageDetails.setImageSourceTag(URLDecoder.decode(imageEle.outerHtml(), StandardCharsets.UTF_8.toString()));
+										imageDetails.setImageSourceTag(URLDecoder.decode(imageEle.outerHtml(), (StandardCharsets.UTF_8).toString()));
 										if(null!=imageDetails.getImageSourceTag() && imageDetails.getImageSourceTag().length()>4000)
 										{
 											imageDetails.setImageSourceTag(imageDetails.getImageSourceTag().substring(0, (4000-1)));
