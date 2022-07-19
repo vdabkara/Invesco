@@ -96,7 +96,7 @@ public class ReadTransactionDAO extends DBConnectionHelper{
 				String sql = "";
 				sql = "select documentid,localeid,majorversion,minorversion,dateadded,displayenddate,displayreviewdate,publishdate,published,basedlocaleid,indexmasteridentifiers,ownername "
 						+ "from infomanager.contenttext where minorversion =0 and majorversion >= 1 and documentid like '"+channelAbbr.trim()+"%' AND "
-						+ "localeid='"+locale+"' AND dateadded >= to_date('"+criteriaDate+"','YYYY-MM-DD')  fetch next 10 rows only";
+						+ "localeid='"+locale+"' AND dateadded >= to_date('"+criteriaDate+"','YYYY-MM-DD') ";
 				logger.info("getDocumentsList :: Sql :: >"+ sql);
 				pstmt = conn.prepareStatement(sql);
 				rs = pstmt.executeQuery();
@@ -325,7 +325,7 @@ public class ReadTransactionDAO extends DBConnectionHelper{
 				String sql = "";
 				sql = "select documentid,localeid,majorversion,minorversion,dateadded,displayenddate,displayreviewdate,publishdate,published,basedlocaleid,indexmasteridentifiers,ownername  "
 						+ "from infomanager.contenttext where minorversion =0 and majorversion >= 1 and documentid like '"+channelAbbr.trim()+"%' AND "
-						+ "localeid='"+locale+"' AND dateadded >= to_date('"+criteriaDate+"','YYYY-MM-DD')  fetch next 10 rows only";
+						+ "localeid='"+locale+"' AND dateadded >= to_date('"+criteriaDate+"','YYYY-MM-DD') ";
 				logger.info("getENUSOneYearDocumentsList :: Sql :: >"+ sql);
 				pstmt = conn.prepareStatement(sql);
 				rs = pstmt.executeQuery();

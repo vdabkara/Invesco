@@ -958,7 +958,7 @@ public class CustomUtils {
 										// add this Image
 										imageDetails = new InlineImageDetails();
 										imageDetails.setImageSourcePath(srcValue);
-										imageDetails.setImageSourceTag(URLDecoder.decode(imageEle.outerHtml(), (StandardCharsets.UTF_8).toString()));
+										imageDetails.setImageSourceTag(URLDecoder.decode(imageEle.outerHtml(), StandardCharsets.UTF_8));
 										if(null!=imageDetails.getImageSourceTag() && imageDetails.getImageSourceTag().length()>4000)
 										{
 											imageDetails.setImageSourceTag(imageDetails.getImageSourceTag().substring(0, (4000-1)));
@@ -1082,7 +1082,7 @@ public class CustomUtils {
 			// check for channelFolder
 			destPath=destPath+details.getChannelRefKey();
 			File dir = new File(destPath);
-			if(!dir.exists() && !dir.isDirectory())
+			if(!dir.exists() || !dir.isDirectory())
 			{
 				dir.mkdir();
 			}
@@ -1090,7 +1090,7 @@ public class CustomUtils {
 			// check for documentIdFolder
 			destPath=destPath+"/"+details.getDocumentId();
 			dir = new File(destPath);
-			if(!dir.exists() && !dir.isDirectory())
+			if(!dir.exists() || !dir.isDirectory())
 			{
 				dir.mkdir();
 			}
@@ -1098,7 +1098,7 @@ public class CustomUtils {
 			// check for versionFolder
 			destPath=destPath+"/version"+details.getMajorVersion();
 			dir = new File(destPath);
-			if(!dir.exists() && !dir.isDirectory())
+			if(!dir.exists() || !dir.isDirectory())
 			{
 				dir.mkdir();
 			}
