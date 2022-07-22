@@ -374,7 +374,10 @@ public class WriteTransactionDAO extends DBConnectionHelper{
 		try
 		{
 			conn = getDestinationConnection();
-			String sql = "select * from INNERLINK_DETAILS order by ID ASC OFFSET "+offset+" ROWS FETCH NEXT "+limit+" ROWS ONLY";
+			String sql = "select A.*,B.DOCUMENT_STATUS from INNERLINK_DETAILS A,DOCUMENT_DETAILS B WHERE "
+					+ " A.DOCUMENT_ID=B.DOCUMENT_ID AND A.LOCALE = B.LOCALE AND "
+					+ " A.MAJOR_VERSION=B.MAJOR_VERSION AND A.MINOR_VERSION=B.MINOR_VERSION"
+					+ " order by A.ID ASC OFFSET "+offset+" ROWS FETCH NEXT "+limit+" ROWS ONLY";
 			System.out.println(sql);
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
@@ -387,8 +390,11 @@ public class WriteTransactionDAO extends DBConnectionHelper{
 				details.getDocumentDetails().setChannelRefKey(rs.getString("CHANNEL_REF_KEY"));
 				details.getDocumentDetails().setDocumentId(rs.getString("DOCUMENT_ID"));
 				details.getDocumentDetails().setLocale(rs.getString("LOCALE"));
+				details.getDocumentDetails().setBaseLocale(rs.getString("BASE_LOCALE"));
 				details.getDocumentDetails().setMajorVersion(rs.getString("MAJOR_VERSION"));
 				details.getDocumentDetails().setMinorVersion(rs.getString("MINOR_VERSION"));
+				details.getDocumentDetails().setDocumentStatus(rs.getString("DOCUMENT_STATUS"));
+				details.getDocumentDetails().setIsTranslation(rs.getString("IS_TRANSLATION"));
 				
 				details.setInnerLinkSourceUrl(rs.getString("INNERLINK_PATH"));
 				details.setInnerLinkSourceTagLength(rs.getString("SOURCE_TAG_LENGTH"));
@@ -424,6 +430,76 @@ public class WriteTransactionDAO extends DBConnectionHelper{
 		return list;
 	}
 
+	public List<InlineImageDetails> getInlineImagesForReport(int offset, int limit)
+	{
+		Connection conn = null;
+		ResultSet rs = null;
+		PreparedStatement pstmt=null;
+		List<InlineImageDetails> list = null;
+		try
+		{
+			conn = getDestinationConnection();
+			String sql = "select A.CHANNEL_REF_KEY,A.DOCUMENT_ID,A.LOCALE,A.BASE_LOCALE,A.IS_TRANSLATION,B.DOCUMENT_STATUS,A.MAJOR_VERSION,A.MINOR_VERSION,"
+					+ "A.SOURCE_FILE_NAME,A.SOURCE_FILE_PATH,A.DEST_FILE_NAME,A.DEST_FILE_PATH,A.PROCESSING_STATUS,A.ERROR_MESSAGE,A.SOURCE_TAG "
+					+ "from INLINEIMAGES_DETAILS A, DOCUMENT_DETAILS B WHERE A.DOCUMENT_ID=B.DOCUMENT_ID AND A.LOCALE = B.LOCALE "
+					+ "AND A.MAJOR_VERSION=B.MAJOR_VERSION AND A.MINOR_VERSION=B.MINOR_VERSION "
+					+ "order by A.ID ASC OFFSET "+offset+" ROWS FETCH NEXT "+limit+" ROWS ONLY";
+			System.out.println(sql);
+			pstmt = conn.prepareStatement(sql);
+			rs=pstmt.executeQuery();
+			InlineImageDetails details = null;
+			while(rs.next())
+			{
+				details = new InlineImageDetails();
+				details.setDocumentDetails(new DocumentDetails());
+				details.getDocumentDetails().setChannelRefKey(rs.getString("CHANNEL_REF_KEY"));
+				details.getDocumentDetails().setDocumentId(rs.getString("DOCUMENT_ID"));
+				details.getDocumentDetails().setLocale(rs.getString("LOCALE"));
+				details.getDocumentDetails().setBaseLocale(rs.getString("BASE_LOCALE"));
+				details.getDocumentDetails().setMajorVersion(rs.getString("MAJOR_VERSION"));
+				details.getDocumentDetails().setMinorVersion(rs.getString("MINOR_VERSION"));
+				details.getDocumentDetails().setDocumentStatus(rs.getString("DOCUMENT_STATUS"));
+				details.getDocumentDetails().setIsTranslation(rs.getString("IS_TRANSLATION"));
+				
+				details.setImageSourceName(rs.getString("SOURCE_FILE_NAME"));
+				details.setImageSourcePath(rs.getString("SOURCE_FILE_PATH"));
+				details.setImageDestName(rs.getString("DEST_FILE_NAME"));
+				details.setImageDestPath(rs.getString("DEST_FILE_PATH"));
+				details.setProcessingStatus(rs.getString("PROCESSING_STATUS"));
+				details.setErrorMessage(rs.getString("ERROR_MESSAGE"));
+				details.setImageSourceTag(rs.getString("SOURCE_TAG"));
+				if(null==list || list.size()<=0)
+				{
+					list = new ArrayList<InlineImageDetails>();
+				}
+				list.add(details);
+				details = null;
+			}
+		}
+		catch(Exception e)
+		{
+			Utilities.printStackTraceToLogs(WriteTransactionDAO.class.getName(), "getInlineImagesForReport()", e);
+		}
+		finally
+		{
+			try
+			{
+				if(null!=conn)
+					conn.close();conn=null;
+				if(null!=rs)
+					rs.close();rs=null;
+				if(null!=pstmt)
+					pstmt.close();pstmt=null;
+			}
+			catch(SQLException e)
+			{
+				Utilities.printStackTraceToLogs(WriteTransactionDAO.class.getName(), "getInlineImagesForReport()", e);
+			}
+		}
+		return list;
+	}
+
+	
 	public List<InlineImageDetails> getInlineImagesDetails()
 	{
 		Connection conn = null;
