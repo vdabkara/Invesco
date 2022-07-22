@@ -18,28 +18,28 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.invesco.datamigration.dao.WriteTransactionDAO;
 import com.invesco.datamigration.utils.Utilities;
-import com.invesco.datamigration.vo.InlineInnerlinkDetails;
+import com.invesco.datamigration.vo.InlineImageDetails;
 
-public class PrintInnerlinkDetailsReportImpl {
+public class PrintInlineImagesDetailsReportImpl {
 
-	private static Logger logger = Logger.getLogger(PrintInnerlinkDetailsReportImpl.class);
+	private static Logger logger = Logger.getLogger(PrintInlineImagesDetailsReportImpl.class);
 	
 	public static void main(String[] args) {
 		// initialie Loggers
-		File jarPath = new File(PrintInnerlinkDetailsReportImpl.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		File jarPath = new File(PrintInlineImagesDetailsReportImpl.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 		String propertiesPath = jarPath.getParentFile().getAbsolutePath();
 		PropertyConfigurator.configure(propertiesPath+"/"+"log.properties");
 		try
 		{
-			generateInnerLinksReports();
+			generateInlineImagesReports();
 		}
 		catch(Exception e)
 		{
-			Utilities.printStackTraceToLogs(PrintInnerlinkDetailsReportImpl.class.getName(), "main()", e);
+			Utilities.printStackTraceToLogs(PrintInlineImagesDetailsReportImpl.class.getName(), "main()", e);
 		}
 	}
 	
-	private static void generateInnerLinksReports()
+	private static void generateInlineImagesReports()
 	{
 		try
 		{
@@ -58,11 +58,11 @@ public class PrintInnerlinkDetailsReportImpl {
 				{
 					offset = offset+limit;
 				}
-				List<InlineInnerlinkDetails> list = dao.getInnerlinkDetails(offset, limit);
+				List<InlineImageDetails> list = dao.getInlineImagesForReport(offset, limit);
 				if(null!=list && list.size()>0)
 				{
 					String path="C:/Users/dabkav/Documents/WD/Reports/22-07-2022";
-					String fName = "/INNERLINKS_DETAILS_"+(a+1)+".xlsx";
+					String fName = "/INLINEIMAGES_DETAILS_"+(a+1)+".xlsx";
 
 					File myFile = new File(path + fName);     
 					// Create the workbook instance for XLSX file, KEEP 100 ROWS IN MEMMORY AND RET ON DISK
@@ -90,7 +90,8 @@ public class PrintInnerlinkDetailsReportImpl {
 					Row headerRow = mySheet.createRow(0);
 					Cell headerCell = null;
 
-					String headers="CHANNEL_REFKEY,DOCUMENT_ID,LOCALE,BASE_LOCALE,IS_TRANSLATION,DOCUMENT_STATUS,MAJOR_VERSION,MINOR_VERSION,INNERLINK_PATH,SOURCE_TAG_LENGTH,SOURCE_TAG"; 
+					String headers="CHANNEL_REFKEY,DOCUMENT_ID,LOCALE,BASE_LOCALE,IS_TRANSLATION,DOCUMENT_STATUS,MAJOR_VERSION,MINOR_VERSION,"
+							+ "SOURCE_FILE_NAME,SOURCE_FILE_PATH,DEST_FILE_NAME,DEST_FILE_PATH,PROCESSING_STATUS,ERROR_MESSAGE,IMG_SOURCE_TAG"; 
 					String[] tokens=headers.split(",");
 					if(null!=tokens && tokens.length>0)
 					{
@@ -117,7 +118,7 @@ public class PrintInnerlinkDetailsReportImpl {
 					 String dataRow="";
 					Row row=null;
 					Cell dataCell=null;
-					InlineInnerlinkDetails details = null;
+					InlineImageDetails details = null;
 					Font dFont = myWorkBook.createFont();
 					dFont.setFontHeightInPoints((short)10);
 					
@@ -130,11 +131,13 @@ public class PrintInnerlinkDetailsReportImpl {
 					
 					for(int b=0;b<list.size();b++)
 					{
-						details = (InlineInnerlinkDetails)list.get(b);
+						details = (InlineImageDetails)list.get(b);
 						dataRow=details.getDocumentDetails().getChannelRefKey()+"<TOK_SEPARATOR>"+details.getDocumentDetails().getDocumentId()+"<TOK_SEPARATOR>";
 						dataRow+=details.getDocumentDetails().getLocale()+"<TOK_SEPARATOR>"+details.getDocumentDetails().getBaseLocale()+"<TOK_SEPARATOR>"+details.getDocumentDetails().getIsTranslation()+"<TOK_SEPARATOR>";
 						dataRow+=details.getDocumentDetails().getDocumentStatus()+"<TOK_SEPARATOR>"+details.getDocumentDetails().getMajorVersion()+"<TOK_SEPARATOR>"+details.getDocumentDetails().getMinorVersion()+"<TOK_SEPARATOR>";
-						dataRow+=details.getInnerLinkSourceUrl()+"<TOK_SEPARATOR>"+details.getInnerLinkSourceTagLength()+"<TOK_SEPARATOR>"+details.getInnerLinkSourceTag();
+						dataRow+=details.getImageSourceName()+"<TOK_SEPARATOR>"+details.getImageSourcePath()+"<TOK_SEPARATOR>"+details.getImageDestName()+"<TOK_SEPARATOR>";
+						dataRow+=details.getImageDestPath()+"<TOK_SEPARATOR>"+details.getProcessingStatus()+"<TOK_SEPARATOR>"+details.getErrorMessage()+"<TOK_SEPARATOR>";
+						dataRow+=details.getImageSourceTag();
 						// increment rowCount by 1
 						rowCount++;
 						// Create a new Row
@@ -167,7 +170,7 @@ public class PrintInnerlinkDetailsReportImpl {
 
 					FileOutputStream os = new FileOutputStream(myFile);
 					myWorkBook.write(os);
-					logger.info("Writing on INNERLINK REPORT XLSX NAMED AS >"+fName+" file Finished ...");
+					logger.info("Writing on INLINEIMAGES REPORT XLSX NAMED AS >"+fName+" file Finished ...");
 					os.flush();
 					os.close();
 
@@ -192,7 +195,7 @@ public class PrintInnerlinkDetailsReportImpl {
 		}
 		catch(Exception e)
 		{
-			Utilities.printStackTraceToLogs(PrintInnerlinkDetailsReportImpl.class.getName(), "generateInnerLinksReports()", e);
+			Utilities.printStackTraceToLogs(PrintInlineImagesDetailsReportImpl.class.getName(), "generateInlineImagesReports()", e);
 		}
 	}
 
