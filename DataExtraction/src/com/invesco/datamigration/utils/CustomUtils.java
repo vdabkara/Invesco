@@ -958,7 +958,7 @@ public class CustomUtils {
 										// add this Image
 										imageDetails = new InlineImageDetails();
 										imageDetails.setImageSourcePath(srcValue);
-										imageDetails.setImageSourceTag(URLDecoder.decode(imageEle.outerHtml(), String.valueOf(StandardCharsets.UTF_8)));
+										imageDetails.setImageSourceTag(URLDecoder.decode(imageEle.outerHtml(), StandardCharsets.UTF_8));
 										if(null!=imageDetails.getImageSourceTag() && imageDetails.getImageSourceTag().length()>4000)
 										{
 											imageDetails.setImageSourceTag(imageDetails.getImageSourceTag().substring(0, (4000-1)));

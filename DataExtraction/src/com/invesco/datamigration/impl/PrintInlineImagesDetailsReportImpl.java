@@ -61,7 +61,7 @@ public class PrintInlineImagesDetailsReportImpl {
 				List<InlineImageDetails> list = dao.getInlineImagesForReport(offset, limit);
 				if(null!=list && list.size()>0)
 				{
-					String path="C:/Users/dabkav/Documents/WD/Reports/22-07-2022";
+					String path="C:/Users/dabkav/Documents/WD/Reports/30-07-2022";
 					String fName = "/INLINEIMAGES_DETAILS_"+(a+1)+".xlsx";
 
 					File myFile = new File(path + fName);     

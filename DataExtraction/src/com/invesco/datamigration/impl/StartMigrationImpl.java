@@ -71,16 +71,18 @@ public class StartMigrationImpl {
 				/*
 				 * IDENTIFY SEARCH CRITERIA DATE - WHICH WILL BE 3 YEARS LESS THEN CURRENT DATE
 				 */
-				String criteriaDate = Utilities.getPreviousDate(-3);
-//				String criteriaDate = "2015-04-24";
+//				String criteriaDate = Utilities.getPreviousDate(-3);
+				String criteriaDate = "2019-01-01";
 				// get ONE YEAR BEHIND CRITERIA DATE FOR EN_US - UNPUBLISHED DOCUMENTS 
-				String oneYearCriteriaDate = Utilities.getPreviousDate(-1);
-//				String oneYearCriteriaDate= "2021-04-24";
+//				String oneYearCriteriaDate = Utilities.getPreviousDate(-1);
+				String oneYearCriteriaDate= "2021-01-01";
 				logger.info("startMigration:: Previous 3 Years Date Identified is :: >"+ criteriaDate);
 				logger.info("startMigration:: Previous 1 Year Date Identified for EN_US LOCALE for LIVE / EXPIRED DOCS is :: >"+ oneYearCriteriaDate);
 				ChannelDetails channelDetails = null;
 				List<DocumentDetails> documentsList = null;
+				List<DocumentDetails> threeYearsDocumentsList = null;
 				List<DocumentDetails> enUsOneYearDocumentsList = null;
+				List<DocumentDetails> liveDocumentsMinus3And7YearsList = null;
 				DocumentDetails documentDetails=null;
 				DocumentDetails versionDetails = null;
 				for(int a=0;a<channelsList.size();a++)
@@ -89,10 +91,34 @@ public class StartMigrationImpl {
 					logger.info("############ Start Processing ::> "+ channelDetails.getChannelName()+" For Locale :: >"+ channelDetails.getLocale());
 					/*
 					 * START FETCHING DOCUMENTS
+					 * FETCH LIVE DOCUMENTS ONLY = MINUS 3 YEARS CRITERIA & MINUS 7 YEARS DOCS DATA FOR EN_CA LOCALE ONLY
 					 */
-					documentsList = readTransactionDAO.getDocumentsList(channelDetails.getChannelAbbr(), channelDetails.getLocale(), criteriaDate);
+					liveDocumentsMinus3And7YearsList = readTransactionDAO.getLiveDocumentsMinus3And7YearsList(channelDetails.getChannelAbbr(), channelDetails.getLocale(), criteriaDate);
+					if(null!=liveDocumentsMinus3And7YearsList && liveDocumentsMinus3And7YearsList.size()>0)
+					{
+						// add to documentsList
+						if(null==documentsList || documentsList.size()<=0)
+						{
+							documentsList = new ArrayList<DocumentDetails>();
+						}
+						documentsList.addAll(liveDocumentsMinus3And7YearsList);
+					}
+					liveDocumentsMinus3And7YearsList = null;
+//					// FETCH ON 3 YEARS CRITERIA
+					threeYearsDocumentsList = readTransactionDAO.getDocumentsList(channelDetails.getChannelAbbr(), channelDetails.getLocale(), criteriaDate);
+					if(null!=threeYearsDocumentsList && threeYearsDocumentsList.size()>0)
+					{
+						// add to documentsList
+						if(null==documentsList || documentsList.size()<=0)
+						{
+							documentsList = new ArrayList<DocumentDetails>();
+						}
+						documentsList.addAll(threeYearsDocumentsList);
+					}
+					threeYearsDocumentsList = null;
 					if(channelDetails.getLocale().trim().toLowerCase().equals("en_us"))
 					{
+						// FETCH ON 1 YEAR CRITERIA
 						enUsOneYearDocumentsList= readTransactionDAO.getENUSOneYearDocumentsList(channelDetails.getChannelAbbr(), channelDetails.getLocale(), oneYearCriteriaDate);
 						if(null!=enUsOneYearDocumentsList && enUsOneYearDocumentsList.size()>0)
 						{
@@ -141,12 +167,12 @@ public class StartMigrationImpl {
 									logger.info(" ------ PROCESSING VERSION > "+ versionDetails.getMajorVersion()+"."+versionDetails.getMinorVersion()+" ------");
 									/*
 									 *  prepare IQ XML Path
-									 *  IF DOCUMENT IS PUBLISED E.G. LIVE / EXPIRED
+									 *  IF DOCUMENT IS PUBLISED E.G. LIVE 
 									 *  	LOOK FOR THE VERSION IN LIVE FOLDER
 									 *  ELSE
 									 *  	LOOK FOR THE VERSION IN STAGING FOLDER
 									 */
-									if(versionDetails.getDocumentStatus().equals("LIVE") || versionDetails.getDocumentStatus().equals("EXPIRED"))
+									if(versionDetails.getDocumentStatus().equals("LIVE"))
 									{
 										logger.info("---------------- PROCEED FOR CHECKING IN LIVE FOLDER ---------------");
 										versionDetails = CustomUtils.findXMLFileInLiveFolder(versionDetails);
