@@ -32,7 +32,7 @@ public class ReadTransactionDAO extends DBConnectionHelper{
 		try
 		{
 			conn = getDestinationConnection();
-			String sql = "select * from im_channel_locale_mapping";
+			String sql = "select * from im_channel_locale_mappin";
 			pstmt = conn.prepareStatement(sql);
 			rs=pstmt.executeQuery();
 			ChannelDetails details = null;
@@ -753,4 +753,172 @@ public class ReadTransactionDAO extends DBConnectionHelper{
 		return documentsList;
 	}
 
+	public List<DocumentDetails> getDocumentsListForAddingMasterIdentifiers()
+	{
+		Connection conn = null;
+		ResultSet rs = null;
+		PreparedStatement pstmt=null;
+		List<DocumentDetails> documentsList = null;
+		try
+		{
+			conn = getDestinationConnection();
+			int limit = 1000;
+			int endValue=77;
+			int offset=0;
+			for(int a=0;a<endValue;a++)
+			{
+				if(a==0)
+				{
+					offset = 0;
+				}
+				else
+				{
+					offset = offset+limit;
+				}
+				String sql = "select distinct CHANNEL_REF_KEY,DOCUMENT_ID,MAJOR_VERSION from DOCUMENT_DETAILS  ";
+				sql = sql+" ORDER BY DOCUMENT_ID ASC OFFSET " + offset+" ROWS FETCH NEXT "+limit+" ROWS ONLY ";
+				logger.info("getDocumentsListForAddingMasterIdentifiers :: SQL :: >"+ sql);
+				pstmt = conn.prepareStatement(sql);
+				rs=pstmt.executeQuery();
+				DocumentDetails details = null;
+				List<DocumentDetails> tempList=  null;
+				List<String> uniqueDocumentsList = new ArrayList<String>();
+				boolean add = true;
+				while(rs.next())
+				{
+					details = new DocumentDetails();
+					details.setDocumentId(rs.getString("DOCUMENT_ID"));
+					details.setMajorVersion(rs.getString("MAJOR_VERSION"));
+					details.setChannelRefKey(rs.getString("CHANNEL_REF_KEY"));
+					if(null==tempList || tempList.size()<=0)
+					{
+						tempList = new ArrayList<DocumentDetails>();
+					}
+					tempList.add(details);
+					/*
+					 * add documentId to uniqueList
+					 */
+					add = true;
+					if(null!=uniqueDocumentsList && uniqueDocumentsList.size()>0)
+					{
+						for(int c=0;c<uniqueDocumentsList.size();c++)
+						{
+							if(uniqueDocumentsList.get(c).trim().toLowerCase().equals(details.getDocumentId().trim().toLowerCase()))
+							{
+								add =false;
+								break;
+							}
+						}
+					}
+					
+					if(add==true)
+					{
+						uniqueDocumentsList.add(details.getDocumentId());
+					}
+					details = null;
+				}
+				pstmt.close();pstmt=null;
+				rs.close();rs=null;
+				sql = null;
+				
+				if(null!=tempList && tempList.size()>0)
+				{
+					logger.info("getDocumentsListForAddingMasterIdentifiers :: Total Unique Documents from offset ("+offset+") Found are :: >"+ tempList.size());
+					/*
+					 * iterate documents list and read base_locale for each
+					 */
+					String keyToCheck="";
+					details = null;
+					if(null!=uniqueDocumentsList && uniqueDocumentsList.size()>0)
+					{
+						for(int b=0;b<uniqueDocumentsList.size();b++)
+						{
+							keyToCheck+="'"+uniqueDocumentsList.get(b).toString()+"'";
+							if(b!=uniqueDocumentsList.size()-1)
+							{
+								keyToCheck+=",";
+							}
+							details = null;
+						}
+					}
+					if(null!=keyToCheck && !"".equals(keyToCheck))
+					{
+						String docId=null;
+						sql  ="SELECT BASE_LOCALE,DOCUMENT_ID FROM DOCUMENT_DETAILS WHERE DOCUMENT_ID IN ("+keyToCheck+")";
+						logger.info("getDocumentsListForAddingMasterIdentifiers :: SQL :: >"+ sql);
+						pstmt = conn.prepareStatement(sql);
+						rs = pstmt.executeQuery();
+						while(rs.next())
+						{
+							docId = rs.getString("DOCUMENT_ID");
+							if(null!=docId && !"".equals(docId) && null!=tempList && tempList.size()>0)
+							{
+								details = null;
+								for(int b=0;b<tempList.size();b++)
+								{
+									details = (DocumentDetails) tempList.get(b);
+									if(docId.trim().toLowerCase().equals(details.getDocumentId().trim().toLowerCase()))
+									{
+										// set BASE LOCALE
+										details.setBaseLocale(rs.getString("BASE_LOCALE"));
+									}
+									details= null;
+								}
+							}
+							docId = null;
+						}
+						pstmt.close();pstmt=null;
+						rs.close();rs=null;
+						sql  =null;
+					}
+					keyToCheck = null;
+					/*
+					 * ADD TO DOCUMENT LIST
+					 */
+					if(null==documentsList || documentsList.size()<=0)
+					{
+						documentsList = new ArrayList<DocumentDetails>();
+					}
+					documentsList.addAll(tempList);
+				}
+				else
+				{
+					logger.info("getDocumentsListForAddingMasterIdentifiers :: No Unique Documents Found from Offset :: >"+ offset);
+				}
+				tempList = null;
+			}
+			
+			if(null!=documentsList && documentsList.size()>0)
+			{
+				logger.info("getDocumentsListForAddingMasterIdentifiers :: Total Unique Documents Found are :: >"+ documentsList.size());
+			}
+			else
+			{
+				logger.info("getDocumentsListForAddingMasterIdentifiers :: No Unique Documents Found.");
+			}
+		}
+		catch(Exception e)
+		{
+			Utilities.printStackTraceToLogs(ReadTransactionDAO.class.getName(), "getDocumentsListForAddingMasterIdentifiers()", e);
+		}
+		finally
+		{
+			try
+			{
+				if(null!=conn)
+					conn.close();conn=null;
+				if(null!=rs)
+					rs.close();rs=null;
+				if(null!=pstmt)
+					pstmt.close();pstmt=null;
+			}
+			catch(SQLException e)
+			{
+				Utilities.printStackTraceToLogs(ReadTransactionDAO.class.getName(), "getDocumentsListForAddingMasterIdentifiers()", e);
+			}
+		}
+		return documentsList;
+	}
+
+	
 }

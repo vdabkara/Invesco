@@ -61,7 +61,7 @@ public class PrintInnerlinkDetailsReportImpl {
 				List<InlineInnerlinkDetails> list = dao.getInnerlinkDetails(offset, limit);
 				if(null!=list && list.size()>0)
 				{
-					String path="C:/Users/dabkav/Documents/WD/Reports/30-07-2022";
+					String path="C:/Users/dabkav/Documents/WD/Reports/30-07-2022/INLINE_INNERLINKS";
 					String fName = "/INNERLINKS_DETAILS_"+(a+1)+".xlsx";
 
 					File myFile = new File(path + fName);     

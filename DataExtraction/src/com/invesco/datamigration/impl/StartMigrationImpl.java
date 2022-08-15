@@ -93,7 +93,7 @@ public class StartMigrationImpl {
 					 * START FETCHING DOCUMENTS
 					 * FETCH LIVE DOCUMENTS ONLY = MINUS 3 YEARS CRITERIA & MINUS 7 YEARS DOCS DATA FOR EN_CA LOCALE ONLY
 					 */
-					liveDocumentsMinus3And7YearsList = readTransactionDAO.getLiveDocumentsMinus3And7YearsList(channelDetails.getChannelAbbr(), channelDetails.getLocale(), criteriaDate);
+//					liveDocumentsMinus3And7YearsList = readTransactionDAO.getLiveDocumentsMinus3And7YearsList(channelDetails.getChannelAbbr(), channelDetails.getLocale(), criteriaDate);
 					if(null!=liveDocumentsMinus3And7YearsList && liveDocumentsMinus3And7YearsList.size()>0)
 					{
 						// add to documentsList
