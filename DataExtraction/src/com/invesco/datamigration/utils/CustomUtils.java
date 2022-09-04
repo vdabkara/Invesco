@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
@@ -1078,6 +1079,24 @@ public class CustomUtils {
 	{
 		try
 		{
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			String displayReviewDate="";
+			if(null!=details.getDisplayReviewDate())
+			{
+				displayReviewDate=sdf.format(details.getDisplayReviewDate())+" Etc/GMT";
+			}
+			
+			if(null!=details.getXmlContent() && !"".equals(details.getXmlContent())) 
+			{
+				/*
+				 * REPLACE </CONTENT> BY <DISPLAYREVIEWDATE></DISPLAYREVIEWDATE></CONTENT>
+				 */
+				details.setXmlContent(details.getXmlContent().replace("</CONTENT>", "<DISPLAYREVIEWDATE>"+displayReviewDate+"</DISPLAYREVIEWDATE></CONTENT>"));
+			}
+			displayReviewDate = null;
+			sdf = null;
+			
+			
 			String destPath=ApplicationProperties.getProperty("invesco.content.extract.location");
 			// check for channelFolder
 			destPath=destPath+details.getChannelRefKey();
@@ -1146,7 +1165,13 @@ public class CustomUtils {
 									for(int r=0;r<nodesList.getLength();r++)
 									{
 										childNode =(Node)nodesList.item(r);
-										if(null!=childNode.getNodeName() && childNode.getNodeName().toLowerCase().equals("langDataList".toLowerCase()))
+										if(null!=childNode.getNodeName() && childNode.getNodeName().toLowerCase().equals("masterIdentifierLocale".toLowerCase()))
+										{
+											// remove masterIdentifer Node
+											htmlRootNode.removeChild(childNode);
+											r--;
+										}
+										else if(null!=childNode.getNodeName() && childNode.getNodeName().toLowerCase().equals("langDataList".toLowerCase()))
 										{
 											NodeList langChildNodesList = childNode.getChildNodes();
 											if(null!=langChildNodesList && langChildNodesList.getLength()>0)
@@ -1186,6 +1211,15 @@ public class CustomUtils {
 									}
 									langNodeToBeRemoved = null;
 								}
+								
+								/*
+								 * APPEND MASTER IDENTIFIER NODE TO HTML ROOT NODE
+								 */
+								org.w3c.dom.Element newEle = document.createElement("masterIdentifierLocale");
+								newEle.setTextContent(details.getBaseLocale());
+								htmlRootNode.appendChild(newEle);
+								newEle = null;
+								
 								// NOW CONVERT DOCUMENT TO STRING
 								String xmlDoc = Utilities.transformString(document);
 								if(null!=xmlDoc && !"".equals(xmlDoc))
@@ -1277,9 +1311,9 @@ public class CustomUtils {
 			{
 				logger.info("writeXMLFile :: XML File Does not Exists at Destionation Location at Path :: >"+ destPath);
 				logger.info("writeXMLFile :: Proceed for Writing "+details.getLocale()+" Node to the New HTML File.");
-
 				StringBuilder str = new StringBuilder();
 				str.append("<html>");
+				str.append("<masterIdentifierLocale>"+details.getBaseLocale()+"</masterIdentifierLocale>");
 				str.append("<id>"+details.getDocumentId()+"</id>");
 				str.append("<langDataList>");
 				str.append("<language>"+details.getLocale()+"</language>");
@@ -1293,7 +1327,8 @@ public class CustomUtils {
 				str.append("</versionDataList>");
 				str.append("</langDataList>");
 				str.append("</html>");
-
+				
+				
 				/*
 				 * PROCEED FOR WRITING HTML FILE
 				 */
@@ -1323,6 +1358,8 @@ public class CustomUtils {
 			xmlFileName = null;
 			xmlFile = null;
 			destPath = null;
+			displayReviewDate = null;
+			sdf = null;
 		}
 		catch(Exception e)
 		{

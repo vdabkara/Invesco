@@ -93,7 +93,7 @@ public class StartMigrationImpl {
 					 * START FETCHING DOCUMENTS
 					 * FETCH LIVE DOCUMENTS ONLY = MINUS 3 YEARS CRITERIA & MINUS 7 YEARS DOCS DATA FOR EN_CA LOCALE ONLY
 					 */
-//					liveDocumentsMinus3And7YearsList = readTransactionDAO.getLiveDocumentsMinus3And7YearsList(channelDetails.getChannelAbbr(), channelDetails.getLocale(), criteriaDate);
+					liveDocumentsMinus3And7YearsList = readTransactionDAO.getLiveDocumentsMinus3And7YearsList(channelDetails.getChannelAbbr(), channelDetails.getLocale(), criteriaDate);
 					if(null!=liveDocumentsMinus3And7YearsList && liveDocumentsMinus3And7YearsList.size()>0)
 					{
 						// add to documentsList
@@ -171,18 +171,20 @@ public class StartMigrationImpl {
 									 *  	LOOK FOR THE VERSION IN LIVE FOLDER
 									 *  ELSE
 									 *  	LOOK FOR THE VERSION IN STAGING FOLDER
+									 *  
+									 *  DATE 02 SEPT 2022 NO LIVE FOLDER ALWAYS IN STAGING FOLDER
 									 */
-									if(versionDetails.getDocumentStatus().equals("LIVE"))
-									{
-										logger.info("---------------- PROCEED FOR CHECKING IN LIVE FOLDER ---------------");
-										versionDetails = CustomUtils.findXMLFileInLiveFolder(versionDetails);
-									}
-									else
-									{
+//									if(versionDetails.getDocumentStatus().equals("LIVE"))
+//									{
+//										logger.info("---------------- PROCEED FOR CHECKING IN LIVE FOLDER ---------------");
+//										versionDetails = CustomUtils.findXMLFileInLiveFolder(versionDetails);
+//									}
+//									else
+//									{
 										logger.info("---------------- PROCEED FOR CHECKING IN STAGING FOLDER ---------------");
 										// staging folder = Unpublished / Expired
 										versionDetails = CustomUtils.findXMLFileInStagingFolder(versionDetails);
-									}
+//									}
 									/*
 									 * save the transaction is database 
 									 */

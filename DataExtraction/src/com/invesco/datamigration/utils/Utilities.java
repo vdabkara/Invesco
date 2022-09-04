@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -155,6 +156,7 @@ public class Utilities {
 		{
 			StringWriter stw = new StringWriter();
 			Transformer serializer = TransformerFactory.newInstance().newTransformer();
+			serializer.setOutputProperty(OutputKeys.INDENT, "no");
 			serializer.transform(new DOMSource(doc), new StreamResult(stw));
 			stringDoc=stw.toString();
 		}

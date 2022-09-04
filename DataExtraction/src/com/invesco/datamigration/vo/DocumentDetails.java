@@ -43,8 +43,18 @@ public class DocumentDetails {
 	
 	private String xmlContent=null;
 	
+	private String versionInXMLContent=null;
 	
 	
+	
+	public String getVersionInXMLContent() {
+		return versionInXMLContent;
+	}
+
+	public void setVersionInXMLContent(String versionInXMLContent) {
+		this.versionInXMLContent = versionInXMLContent;
+	}
+
 	public String getTitle() {
 		return title;
 	}
